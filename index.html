@@ -202,10 +202,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .hmeta2{color:var(--text3);font-size:11px;text-align:right;margin-top:2px}
 
 /* Config */
-.cfg-bar{display:flex;justify-content:flex-end;margin-bottom:.5rem}
+.cfg-bar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:.5rem;align-items:center}
 .bcfg{padding:6px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .15s}
 .bcfg:hover{background:var(--surface2);color:var(--text)}
 .bcfg svg{width:14px;height:14px}
+.rekap-wrap{position:relative}
+.rekap-dropdown{display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);box-shadow:var(--shadow-md);min-width:200px;z-index:50;overflow:hidden}
+.rekap-dropdown.open{display:block}
+.rditem{width:100%;padding:10px 14px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:var(--text);font-family:inherit;display:flex;align-items:center;gap:10px;transition:background .1s;text-align:left}
+.rditem:hover{background:var(--surface2)}
+.rditem:not(:last-child){border-bottom:1px solid var(--border)}
+.rditem svg{width:15px;height:15px;color:var(--text2);flex-shrink:0}
 
 /* Modal */
 .moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:1rem}
@@ -246,12 +253,61 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 <body>
 <div class="app">
 
-  <!-- Config button -->
+  <!-- Config button + Rekap dropdown -->
   <div class="cfg-bar">
+    <div class="rekap-wrap" id="rekapWrap">
+      <button class="bcfg" onclick="toggleRekapMenu()" id="btnRekap" style="background:#1a1916;color:#fff;border-color:#1a1916">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Generate Rekap
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="width:12px;height:12px"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="rekap-dropdown" id="rekapDropdown">
+        <button class="rditem" onclick="openRekapHarian()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Rangkuman Harian
+        </button>
+        <button class="rditem" onclick="openRekapBulanan()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Rekap Bulanan
+        </button>
+      </div>
+    </div>
     <button class="bcfg" onclick="openCfg()">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       Pengaturan
     </button>
+  </div>
+
+  <!-- Rekap Harian Modal -->
+  <div class="moverlay" id="rhModal">
+    <div class="modal">
+      <div class="mtitle">📅 Rangkuman Harian</div>
+      <div class="msub">Pilih tanggal untuk generate rekap harian ke Google Sheets.</div>
+      <div class="mfield">
+        <label>Tanggal</label>
+        <input type="date" id="rhDate" style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r);font-size:14px;font-family:inherit;color:var(--text);outline:none">
+      </div>
+      <div class="mrow">
+        <button class="bmcancel" onclick="closeModal('rhModal')">Batal</button>
+        <button class="bmsave" onclick="doRekapHarian()">Generate ke Sheets</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rekap Bulanan Modal -->
+  <div class="moverlay" id="rbModal">
+    <div class="modal">
+      <div class="mtitle">📊 Rekap Bulanan</div>
+      <div class="msub">Pilih bulan dan tahun untuk generate rekap bulanan ke Google Sheets.</div>
+      <div class="mfield">
+        <label>Bulan & Tahun</label>
+        <input type="month" id="rbMonth" style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r);font-size:14px;font-family:inherit;color:var(--text);outline:none">
+      </div>
+      <div class="mrow">
+        <button class="bmcancel" onclick="closeModal('rbModal')">Batal</button>
+        <button class="bmsave" onclick="doRekapBulanan()">Generate ke Sheets</button>
+      </div>
+    </div>
   </div>
 
   <!-- Status -->
@@ -475,14 +531,15 @@ const CATALOG = {
     { cat:'Bahan Pokok', items:['Telor','Minyak','Meses','Gula','Tepung Segitiga','Tepung Cakra','Mentega','Bakermix','SKM Putih'] }
   ],
   2: [
-    { cat:'Keju',        items:['Keju Prochiz','Keju Wincheez'] },
-    { cat:'Nutella',     items:['Nutella Besar','Nutella Kecil','Nutella Garing'] },
-    { cat:'Keju Potong', items:['Keju Potong Besar','Keju Potong Kecil','Keju Potong Garing','Keju Pukis'] },
-    { cat:'Bumbu',       items:['Vanili','Soda','Garam','Micin','Bumbu Rendang','Saos Sambal','Saos Tomat'] },
-    { cat:'Kalengan',    items:['Kornet Ayam','Kornet Sapi','Jamur','Tuna','Jagung','Sosis'] },
-    { cat:'Sabun',       items:['Sabun Cuci Piring','Sabun Colek'] },
-    { cat:'Kresek',      items:['Kresek Kuning','Kresek Putih','Kresek Jus Besar','Kresek Jus Kecil'] },
-    { cat:'Dus',         items:['Dus DKG','Dus LKB','Dus LKS','Dus DKM','Dus DBS','Dus DBM','Dus DBB','Dus DK','Dus DB'] }
+    { cat:'Keju',               items:['Keju Prochiz','Keju Wincheez'] },
+    { cat:'Nutella',            items:['Nutella Besar','Nutella Kecil','Nutella Garing'] },
+    { cat:'Keju Potong',        items:['Keju Potong Besar','Keju Potong Kecil','Keju Potong Garing','Keju Pukis'] },
+    { cat:'Bumbu',              items:['Vanili','Soda','Garam','Micin','Bumbu Rendang','Saos Sambal','Saos Tomat'] },
+    { cat:'Kalengan',           items:['Kornet Ayam','Kornet Sapi','Jamur','Tuna','Jagung','Sosis'] },
+    { cat:'Sabun',              items:['Sabun Cuci Piring','Sabun Colek'] },
+    { cat:'Kresek',             items:['Kresek Kuning','Kresek Putih','Kresek Jus Besar','Kresek Jus Kecil'] },
+    { cat:'Dus',                items:['Dus DKG','Dus LKB','Dus LKS','Dus DKM','Dus DBS','Dus DBM','Dus DBB','Dus DK','Dus DB'] },
+    { cat:'Minuman & Kemasan',  items:['Cup Jus','Cup Kopi Dingin','Cup Kopi Panas','Seal Cup','Mangkok','Sedotan','Tissue','Sendok'] }
   ]
 };
 
@@ -501,6 +558,77 @@ function setStatus(type, txt) {
   const el = document.getElementById('statusBar');
   el.className = 'status-bar ' + type;
   document.getElementById('statusTxt').textContent = txt;
+}
+
+// ══════════════════════════════════════════════════════
+// REKAP DROPDOWN
+// ══════════════════════════════════════════════════════
+function toggleRekapMenu() {
+  document.getElementById('rekapDropdown').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!document.getElementById('rekapWrap').contains(e.target)) {
+    document.getElementById('rekapDropdown').classList.remove('open');
+  }
+});
+
+function openRekapHarian() {
+  document.getElementById('rekapDropdown').classList.remove('open');
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('rhDate').value = today;
+  document.getElementById('rhModal').classList.add('open');
+}
+function openRekapBulanan() {
+  document.getElementById('rekapDropdown').classList.remove('open');
+  const now = new Date();
+  document.getElementById('rbMonth').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('rbModal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function doRekapHarian() {
+  const dateVal = document.getElementById('rhDate').value;
+  if (!dateVal) { alert('Pilih tanggal dulu'); return; }
+  const [y,m,d] = dateVal.split('-');
+  const tanggal = d+'/'+m+'/'+y;
+  closeModal('rhModal');
+  document.getElementById('sendOverlay').classList.add('open');
+  document.getElementById('sendMsg').textContent = 'Generating rekap harian ' + tanggal + '...';
+  try {
+    const res  = await fetch(SHEETS_URL + '?action=rekapHarian&tanggal=' + encodeURIComponent(tanggal));
+    const data = await res.json();
+    document.getElementById('sendOverlay').classList.remove('open');
+    if (data.status === 'ok') {
+      alert('✅ ' + data.message + '\n\nBuka Google Sheets tab "Rekap Harian" untuk melihat hasilnya.');
+    } else {
+      alert('❌ Error: ' + data.message);
+    }
+  } catch(e) {
+    document.getElementById('sendOverlay').classList.remove('open');
+    alert('❌ Gagal: ' + e.message);
+  }
+}
+
+async function doRekapBulanan() {
+  const monthVal = document.getElementById('rbMonth').value;
+  if (!monthVal) { alert('Pilih bulan dulu'); return; }
+  const [y,m] = monthVal.split('-');
+  closeModal('rbModal');
+  document.getElementById('sendOverlay').classList.add('open');
+  document.getElementById('sendMsg').textContent = 'Generating rekap bulanan...';
+  try {
+    const res  = await fetch(SHEETS_URL + '?action=rekapBulanan&bulan=' + parseInt(m) + '&tahun=' + y);
+    const data = await res.json();
+    document.getElementById('sendOverlay').classList.remove('open');
+    if (data.status === 'ok') {
+      alert('✅ ' + data.message + '\n\nBuka Google Sheets tab "Rekap Bulanan" untuk melihat hasilnya.');
+    } else {
+      alert('❌ Error: ' + data.message);
+    }
+  } catch(e) {
+    document.getElementById('sendOverlay').classList.remove('open');
+    alert('❌ Gagal: ' + e.message);
+  }
 }
 
 // ══════════════════════════════════════════════════════
