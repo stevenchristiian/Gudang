@@ -282,14 +282,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   <div class="moverlay" id="rhModal">
     <div class="modal">
       <div class="mtitle">📅 Rangkuman Harian</div>
-      <div class="msub">Pilih tanggal untuk generate rekap harian ke Google Sheets.</div>
+      <div class="msub">Pilih tanggal dari daftar transaksi yang tersedia.</div>
       <div class="mfield">
-        <label>Tanggal</label>
-        <input type="date" id="rhDate" style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r);font-size:14px;font-family:inherit;color:var(--text);outline:none">
+        <label>Pilih Tanggal</label>
+        <div id="rhLoading" style="display:flex;align-items:center;gap:8px;padding:10px 0;font-size:13px;color:var(--text3)"><div class="spin"></div> Memuat daftar tanggal...</div>
+        <select id="rhSelect" style="display:none;width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r);font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;cursor:pointer">
+          <option value="">-- Pilih tanggal --</option>
+        </select>
+        <p id="rhEmpty" style="display:none;font-size:13px;color:var(--text3);padding:8px 0">Belum ada transaksi yang tercatat.</p>
       </div>
       <div class="mrow">
         <button class="bmcancel" onclick="closeModal('rhModal')">Batal</button>
-        <button class="bmsave" onclick="doRekapHarian()">Generate ke Sheets</button>
+        <button class="bmsave" id="btnDoRH" onclick="doRekapHarian()" disabled>Generate ke Sheets</button>
       </div>
     </div>
   </div>
@@ -298,14 +302,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   <div class="moverlay" id="rbModal">
     <div class="modal">
       <div class="mtitle">📊 Rekap Bulanan</div>
-      <div class="msub">Pilih bulan dan tahun untuk generate rekap bulanan ke Google Sheets.</div>
+      <div class="msub">Pilih bulan dari daftar transaksi yang tersedia.</div>
       <div class="mfield">
-        <label>Bulan & Tahun</label>
-        <input type="month" id="rbMonth" style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r);font-size:14px;font-family:inherit;color:var(--text);outline:none">
+        <label>Pilih Bulan</label>
+        <div id="rbLoading" style="display:flex;align-items:center;gap:8px;padding:10px 0;font-size:13px;color:var(--text3)"><div class="spin"></div> Memuat daftar bulan...</div>
+        <select id="rbSelect" style="display:none;width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r);font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;cursor:pointer">
+          <option value="">-- Pilih bulan --</option>
+        </select>
+        <p id="rbEmpty" style="display:none;font-size:13px;color:var(--text3);padding:8px 0">Belum ada transaksi yang tercatat.</p>
       </div>
       <div class="mrow">
         <button class="bmcancel" onclick="closeModal('rbModal')">Batal</button>
-        <button class="bmsave" onclick="doRekapBulanan()">Generate ke Sheets</button>
+        <button class="bmsave" id="btnDoRB" onclick="doRekapBulanan()" disabled>Generate ke Sheets</button>
       </div>
     </div>
   </div>
@@ -574,23 +582,86 @@ document.addEventListener('click', e => {
 
 function openRekapHarian() {
   document.getElementById('rekapDropdown').classList.remove('open');
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('rhDate').value = today;
   document.getElementById('rhModal').classList.add('open');
+  openRekapHarianLoad();
 }
 function openRekapBulanan() {
   document.getElementById('rekapDropdown').classList.remove('open');
-  const now = new Date();
-  document.getElementById('rbMonth').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
   document.getElementById('rbModal').classList.add('open');
+  openRekapBulananLoad();
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
+async function openRekapHarianLoad() {
+  // Show loading
+  document.getElementById('rhLoading').style.display = 'flex';
+  document.getElementById('rhSelect').style.display = 'none';
+  document.getElementById('rhEmpty').style.display = 'none';
+  document.getElementById('btnDoRH').disabled = true;
+  try {
+    const res  = await fetch(SHEETS_URL + '?action=getTanggal');
+    const data = await res.json();
+    document.getElementById('rhLoading').style.display = 'none';
+    if (data.status === 'ok' && data.tanggal.length > 0) {
+      const sel = document.getElementById('rhSelect');
+      sel.innerHTML = '<option value="">-- Pilih tanggal --</option>';
+      data.tanggal.forEach(tgl => {
+        const opt = document.createElement('option');
+        opt.value = tgl;
+        // Format tampilan: Selasa, 13 Mei 2026
+        const [d,m,y] = tgl.split('/');
+        const date = new Date(y, m-1, d);
+        const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        const BLAN = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        opt.textContent = HARI[date.getDay()] + ', ' + d + ' ' + BLAN[parseInt(m)] + ' ' + y;
+        sel.appendChild(opt);
+      });
+      sel.style.display = '';
+      sel.onchange = () => { document.getElementById('btnDoRH').disabled = !sel.value; };
+    } else {
+      document.getElementById('rhEmpty').style.display = '';
+    }
+  } catch(e) {
+    document.getElementById('rhLoading').style.display = 'none';
+    document.getElementById('rhEmpty').style.display = '';
+    document.getElementById('rhEmpty').textContent = 'Gagal memuat: ' + e.message;
+  }
+}
+
+async function openRekapBulananLoad() {
+  document.getElementById('rbLoading').style.display = 'flex';
+  document.getElementById('rbSelect').style.display = 'none';
+  document.getElementById('rbEmpty').style.display = 'none';
+  document.getElementById('btnDoRB').disabled = true;
+  try {
+    const res  = await fetch(SHEETS_URL + '?action=getBulan');
+    const data = await res.json();
+    document.getElementById('rbLoading').style.display = 'none';
+    if (data.status === 'ok' && data.bulan.length > 0) {
+      const sel = document.getElementById('rbSelect');
+      sel.innerHTML = '<option value="">-- Pilih bulan --</option>';
+      data.bulan.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.bulan + '|' + b.tahun;
+        opt.textContent = b.label;
+        sel.appendChild(opt);
+      });
+      sel.style.display = '';
+      sel.onchange = () => { document.getElementById('btnDoRB').disabled = !sel.value; };
+    } else {
+      document.getElementById('rbEmpty').style.display = '';
+    }
+  } catch(e) {
+    document.getElementById('rbLoading').style.display = 'none';
+    document.getElementById('rbEmpty').style.display = '';
+    document.getElementById('rbEmpty').textContent = 'Gagal memuat: ' + e.message;
+  }
+}
+
 async function doRekapHarian() {
-  const dateVal = document.getElementById('rhDate').value;
-  if (!dateVal) { alert('Pilih tanggal dulu'); return; }
-  const [y,m,d] = dateVal.split('-');
-  const tanggal = d+'/'+m+'/'+y;
+  const sel = document.getElementById('rhSelect');
+  const tanggal = sel.value;
+  if (!tanggal) { alert('Pilih tanggal dulu'); return; }
   closeModal('rhModal');
   document.getElementById('sendOverlay').classList.add('open');
   document.getElementById('sendMsg').textContent = 'Generating rekap harian ' + tanggal + '...';
@@ -610,14 +681,14 @@ async function doRekapHarian() {
 }
 
 async function doRekapBulanan() {
-  const monthVal = document.getElementById('rbMonth').value;
-  if (!monthVal) { alert('Pilih bulan dulu'); return; }
-  const [y,m] = monthVal.split('-');
+  const sel = document.getElementById('rbSelect');
+  if (!sel.value) { alert('Pilih bulan dulu'); return; }
+  const [bulan, tahun] = sel.value.split('|');
   closeModal('rbModal');
   document.getElementById('sendOverlay').classList.add('open');
   document.getElementById('sendMsg').textContent = 'Generating rekap bulanan...';
   try {
-    const res  = await fetch(SHEETS_URL + '?action=rekapBulanan&bulan=' + parseInt(m) + '&tahun=' + y);
+    const res  = await fetch(SHEETS_URL + '?action=rekapBulanan&bulan=' + bulan + '&tahun=' + tahun);
     const data = await res.json();
     document.getElementById('sendOverlay').classList.remove('open');
     if (data.status === 'ok') {
