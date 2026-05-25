@@ -182,6 +182,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 
 .sel-count{font-size:12px;color:var(--text3);text-align:center;margin:8px 0 4px;min-height:18px}
 
+/* Outlet buttons */
+.outlet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.obtn{padding:1.2rem .75rem;border:1.5px solid var(--border);border-radius:var(--rlg);background:var(--surface2);cursor:pointer;text-align:center;font-family:inherit;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:8px}
+.obtn:hover{border-color:var(--border2);background:var(--surface);box-shadow:var(--shadow)}
+.obtn.sel{border-color:var(--text);background:var(--text)}
+.oicon{font-size:28px;line-height:1}
+.oname{font-size:13px;font-weight:700;color:var(--text)}
+.obtn.sel .oname{color:#fff}
+
 /* Stok table */
 .stbl{width:100%;font-size:13px;border-collapse:collapse}
 .stbl th{text-align:left;padding:6px 8px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border)}
@@ -351,9 +360,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       <div class="sline" id="sc2"></div>
       <div class="si" id="si3"><div class="snum">3</div><span class="slabel">Tipe</span></div>
       <div class="sline" id="sc3"></div>
-      <div class="si" id="si4"><div class="snum">4</div><span class="slabel">Barang</span></div>
+      <div class="si" id="si4"><div class="snum">4</div><span class="slabel">Outlet</span></div>
       <div class="sline" id="sc4"></div>
-      <div class="si" id="si5"><div class="snum">5</div><span class="slabel">Kirim</span></div>
+      <div class="si" id="si5"><div class="snum">5</div><span class="slabel">Barang</span></div>
+      <div class="sline" id="sc5"></div>
+      <div class="si" id="si6"><div class="snum">6</div><span class="slabel">Kirim</span></div>
     </div>
 
     <!-- Page 1: Nama -->
@@ -411,7 +422,32 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       </div>
     </div>
 
-    <!-- Page 4: Barang -->
+    <!-- Page 4: Outlet -->
+    <div class="page" id="p4">
+      <div class="card">
+        <div class="clabel">Untuk Outlet / Keperluan</div>
+        <div class="outlet-grid">
+          <button class="obtn" id="ob_holland" onclick="selOutlet('Holland')">
+            <span class="oicon">🏪</span>
+            <span class="oname">Holland</span>
+          </button>
+          <button class="obtn" id="ob_juskoko" onclick="selOutlet('Jus Koko')">
+            <span class="oicon">🥤</span>
+            <span class="oname">Jus Koko</span>
+          </button>
+          <button class="obtn" id="ob_juscece" onclick="selOutlet('Jus Cece')">
+            <span class="oicon">🧃</span>
+            <span class="oname">Jus Cece</span>
+          </button>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="bbk" onclick="goStep(3)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> Kembali</button>
+        <button class="bnx b-dark" id="bs4" onclick="goStep(5)" disabled>Lanjut <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+
+    <!-- Page 5: Barang -->
     <div class="page" id="p4">
       <div class="card">
         <div class="ibar" id="ibar"></div>
@@ -423,13 +459,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       </div>
       <p class="sel-count" id="selCnt"></p>
       <div class="nav">
-        <button class="bbk" onclick="goStep(3)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> Kembali</button>
-        <button class="bnx b-dark" id="bs4" onclick="goStep(5)" disabled>Review <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
+        <button class="bbk" onclick="goStep(5)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> Kembali</button>
+        <button class="bnx b-dark" id="bs5" onclick="goStep(6)" disabled>Review <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
       </div>
     </div>
 
-    <!-- Page 5: Summary & Kirim -->
-    <div class="page" id="p5">
+    <!-- Page 6: Summary & Kirim -->
+    <div class="page" id="p6">
       <div class="card">
         <div class="clabel">Ringkasan Transaksi</div>
         <div id="sumCont"></div>
@@ -461,8 +497,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       </div>
     </div>
 
-    <!-- Page 6: Success -->
-    <div class="page" id="p6">
+    <!-- Page 7: Success -->
+    <div class="page" id="p7">
       <div class="card">
         <div class="succ">
           <div class="succ-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
@@ -555,7 +591,7 @@ const CATALOG = {
 // STATE
 // ══════════════════════════════════════════════════════
 let STOK = {};
-let S = { step:1, nama:'', wh:0, type:'', sel:{}, collapsed:{} };
+let S = { step:1, nama:'', wh:0, type:'', outlet:'', sel:{}, collapsed:{} };
 let pendingSend = 'both';
 let riwayat = [];
 
@@ -757,8 +793,8 @@ function goStep(n) {
     }
     S.nama = v;
   }
-  if (n === 4) renderItems();
-  if (n === 5) renderSummary();
+  if (n === 5) renderItems();
+  if (n === 6) renderSummary();
   document.getElementById('p' + S.step).classList.remove('active');
   S.step = n;
   document.getElementById('p' + n).classList.add('active');
@@ -767,12 +803,12 @@ function goStep(n) {
 }
 
 function updateSteps() {
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 6; i++) {
     const el = document.getElementById('si' + i);
     el.classList.remove('active','done');
     if (i < S.step) el.classList.add('done');
     else if (i === S.step) el.classList.add('active');
-    if (i < 5) document.getElementById('sc' + i).classList.toggle('done', i < S.step);
+    if (i < 6) document.getElementById('sc' + i).classList.toggle('done', i < S.step);
   }
 }
 
@@ -792,6 +828,14 @@ function selType(t) {
   document.getElementById('bs3').disabled = false;
 }
 
+function selOutlet(o) {
+  S.outlet = o;
+  ['holland','juskoko','juscece'].forEach(k => document.getElementById('ob_'+k).classList.remove('sel'));
+  const idMap = { 'Holland':'ob_holland', 'Jus Koko':'ob_juskoko', 'Jus Cece':'ob_juscece' };
+  if (idMap[o]) document.getElementById(idMap[o]).classList.add('sel');
+  document.getElementById('bs4').disabled = false;
+}
+
 // ══════════════════════════════════════════════════════
 // ITEMS
 // ══════════════════════════════════════════════════════
@@ -801,7 +845,7 @@ function renderItems() {
   const tc = S.type === 'masuk' ? 'b-green' : 'b-red';
   const tl = S.type === 'masuk' ? 'Barang Masuk' : 'Barang Keluar';
   document.getElementById('ibar').innerHTML =
-    `<span class="officer">${S.nama}</span><span class="badge b-blue">${wn}</span><span class="badge ${tc}">${tl}</span>`;
+    `<span class="officer">${S.nama}</span><span class="badge b-blue">${wn}</span><span class="badge ${tc}">${tl}</span><span class="badge" style="background:#f3f4f6;color:#374151">${S.outlet}</span>`;
 
   let html = '';
   cats.forEach(g => {
@@ -876,7 +920,7 @@ function updatePrev(item) {
 function updateSelCnt() {
   const n = Object.values(S.sel).filter(v => v > 0).length;
   document.getElementById('selCnt').textContent = n > 0 ? `${n} jenis barang dipilih` : '';
-  document.getElementById('bs4').disabled = n === 0;
+  document.getElementById('bs5').disabled = n === 0;
 }
 
 function filterItems(q) {
@@ -898,6 +942,7 @@ function renderSummary() {
   let html = `<div class="sum-meta">
     <span class="badge b-blue">${wn}</span>
     <span class="badge ${bc}">${tl}</span>
+    <span class="badge" style="background:#f3f4f6;color:#374151">${S.outlet}</span>
     <span class="sum-off">Petugas: <strong>${S.nama}</strong></span>
   </div><div class="sum-list">`;
   entries.forEach(([item, qty]) => {
@@ -946,6 +991,7 @@ async function confirmSend() {
         gudang: wn,
         gudangKey: String(S.wh),
         tipe: S.type,
+        outlet: S.outlet,
         items
       })
     });
@@ -968,6 +1014,7 @@ async function confirmSend() {
       petugas: S.nama,
       gudang: wn,
       tipe: S.type,
+      outlet: S.outlet,
       items: Object.fromEntries(entries),
       jumlah_jenis: entries.length
     });
@@ -987,7 +1034,7 @@ async function confirmSend() {
     document.getElementById('succMsg').innerHTML =
       `<strong>${entries.length} jenis barang</strong> telah dicatat ${tl} <strong>${wn}</strong>.<br>Data tersimpan di <strong>${dest}</strong>.`;
 
-    goStep(6);
+    goStep(7);
 
   } catch(e) {
     document.getElementById('sendOverlay').classList.remove('open');
@@ -1055,7 +1102,7 @@ function renderRiwayat() {
     html += `<div class="hrow">
       <span class="htype ${tc}">${tl}</span>
       <div style="flex:1">
-        <div class="hdetail">${r.gudang}</div>
+        <div class="hdetail">${r.gudang} · ${r.outlet || '-'}</div>
         <div class="hmeta">${items}</div>
       </div>
       <div>
@@ -1072,14 +1119,15 @@ function renderRiwayat() {
 // RESET
 // ══════════════════════════════════════════════════════
 function resetAll() {
-  S = { step:1, nama:'', wh:0, type:'', sel:{}, collapsed:{} };
+  S = { step:1, nama:'', wh:0, type:'', outlet:'', sel:{}, collapsed:{} };
   pendingSend = 'both';
   document.getElementById('namaInp').value = '';
   document.getElementById('wb1').classList.remove('sel');
   document.getElementById('wb2').classList.remove('sel');
   document.getElementById('tbin').className = 'tbtn';
   document.getElementById('tbout').className = 'tbtn';
-  ['bs2','bs3','bs4'].forEach(id => document.getElementById(id).disabled = true);
+  ['ob_holland','ob_juskoko','ob_juscece'].forEach(id => document.getElementById(id).classList.remove('sel'));
+  ['bs2','bs3','bs4','bs5'].forEach(id => document.getElementById(id).disabled = true);
   ['sbwa','sbsh','sbbo'].forEach(id => document.getElementById(id).classList.remove('active-send'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('p1').classList.add('active');
