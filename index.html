@@ -353,7 +353,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   <div id="tab-trx">
 
     <!-- Steps -->
-    <div class="steps">
+    <div class="steps" id="stepBar">
       <div class="si active" id="si1"><div class="snum">1</div><span class="slabel">Nama</span></div>
       <div class="sline" id="sc1"></div>
       <div class="si" id="si2"><div class="snum">2</div><span class="slabel">Gudang</span></div>
@@ -418,7 +418,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       </div>
       <div class="nav">
         <button class="bbk" onclick="goStep(2)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> Kembali</button>
-        <button class="bnx b-dark" id="bs3" onclick="goStep(4)" disabled>Lanjut <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
+        <button class="bnx b-dark" id="bs3" onclick="goStepFromTipe()" disabled>Lanjut <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
       </div>
     </div>
 
@@ -448,7 +448,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     </div>
 
     <!-- Page 5: Barang -->
-    <div class="page" id="p4">
+    <div class="page" id="p5">
       <div class="card">
         <div class="ibar" id="ibar"></div>
         <div class="swrap">
@@ -459,7 +459,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       </div>
       <p class="sel-count" id="selCnt"></p>
       <div class="nav">
-        <button class="bbk" onclick="goStep(5)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> Kembali</button>
+        <button class="bbk" id="bs5back" onclick="goStepBack5()"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> Kembali</button>
         <button class="bnx b-dark" id="bs5" onclick="goStep(6)" disabled>Review <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
       </div>
     </div>
@@ -802,7 +802,33 @@ function goStep(n) {
   updateSteps();
 }
 
+// Dari tipe: masuk → langsung ke p5 (barang), keluar → ke p4 (outlet)
+function goStepFromTipe() {
+  if (S.type === 'masuk') {
+    S.outlet = '-'; // tidak ada outlet untuk masuk
+    goStep(5);
+  } else {
+    goStep(4);
+  }
+}
+
+// Back dari p5 (barang): masuk → ke p3 (tipe), keluar → ke p4 (outlet)
+function goStepBack5() {
+  if (S.type === 'masuk') {
+    goStep(3);
+  } else {
+    goStep(4);
+  }
+}
+
 function updateSteps() {
+  const isKeluar = S.type === 'keluar';
+  // Show/hide outlet step
+  document.getElementById('si4').style.display = isKeluar ? '' : 'none';
+  document.getElementById('sc3').style.display = isKeluar ? '' : 'none';
+  document.getElementById('sc4').style.display = isKeluar ? '' : 'none';
+
+  // Map visual step numbers for masuk (skip step 4)
   for (let i = 1; i <= 6; i++) {
     const el = document.getElementById('si' + i);
     el.classList.remove('active','done');
@@ -845,7 +871,7 @@ function renderItems() {
   const tc = S.type === 'masuk' ? 'b-green' : 'b-red';
   const tl = S.type === 'masuk' ? 'Barang Masuk' : 'Barang Keluar';
   document.getElementById('ibar').innerHTML =
-    `<span class="officer">${S.nama}</span><span class="badge b-blue">${wn}</span><span class="badge ${tc}">${tl}</span><span class="badge" style="background:#f3f4f6;color:#374151">${S.outlet}</span>`;
+    `<span class="officer">${S.nama}</span><span class="badge b-blue">${wn}</span><span class="badge ${tc}">${tl}</span>${S.type==='keluar'?'<span class="badge" style="background:#f3f4f6;color:#374151">'+S.outlet+'</span>':''}`;
 
   let html = '';
   cats.forEach(g => {
@@ -942,7 +968,7 @@ function renderSummary() {
   let html = `<div class="sum-meta">
     <span class="badge b-blue">${wn}</span>
     <span class="badge ${bc}">${tl}</span>
-    <span class="badge" style="background:#f3f4f6;color:#374151">${S.outlet}</span>
+    ${S.type==='keluar'?'<span class="badge" style="background:#f3f4f6;color:#374151">'+S.outlet+'</span>':''}
     <span class="sum-off">Petugas: <strong>${S.nama}</strong></span>
   </div><div class="sum-list">`;
   entries.forEach(([item, qty]) => {
@@ -1131,6 +1157,10 @@ function resetAll() {
   ['sbwa','sbsh','sbbo'].forEach(id => document.getElementById(id).classList.remove('active-send'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('p1').classList.add('active');
+  // restore outlet step visibility
+  document.getElementById('si4').style.display = '';
+  document.getElementById('sc3').style.display = '';
+  document.getElementById('sc4').style.display = '';
   updateSteps();
   window.scrollTo(0,0);
 }
