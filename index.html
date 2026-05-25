@@ -782,6 +782,15 @@ function switchTab(name) {
 // ══════════════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════════════
+function showPage(pageId) {
+  // Hide semua page dulu
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Show yang diminta
+  const target = document.getElementById(pageId);
+  if (target) target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
 function goStep(n) {
   if (n === 2) {
     const v = document.getElementById('namaInp').value.trim();
@@ -795,17 +804,15 @@ function goStep(n) {
   }
   if (n === 5) renderItems();
   if (n === 6) renderSummary();
-  document.getElementById('p' + S.step).classList.remove('active');
   S.step = n;
-  document.getElementById('p' + n).classList.add('active');
-  window.scrollTo(0,0);
+  showPage('p' + n);
   updateSteps();
 }
 
 // Dari tipe: masuk → langsung ke p5 (barang), keluar → ke p4 (outlet)
 function goStepFromTipe() {
   if (S.type === 'masuk') {
-    S.outlet = '-'; // tidak ada outlet untuk masuk
+    S.outlet = '-';
     goStep(5);
   } else {
     goStep(4);
@@ -1155,14 +1162,12 @@ function resetAll() {
   ['ob_holland','ob_juskoko','ob_juscece'].forEach(id => document.getElementById(id).classList.remove('sel'));
   ['bs2','bs3','bs4','bs5'].forEach(id => document.getElementById(id).disabled = true);
   ['sbwa','sbsh','sbbo'].forEach(id => document.getElementById(id).classList.remove('active-send'));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('p1').classList.add('active');
+  showPage('p1');
   // restore outlet step visibility
   document.getElementById('si4').style.display = '';
   document.getElementById('sc3').style.display = '';
   document.getElementById('sc4').style.display = '';
   updateSteps();
-  window.scrollTo(0,0);
 }
 
 // ══════════════════════════════════════════════════════
